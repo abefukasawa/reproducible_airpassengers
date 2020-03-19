@@ -21,10 +21,21 @@ def data_loading(url, filename, force_download=False):
     df [pandas.DataFrame]
         Desired data in DataFrame
     """
-    
-    file_id = url.split('/')[-2]
-    dwn_url='https://drive.google.com/uc?export=download&id=' + file_id
-    urlretrieve(dwn_url, filename)
+    if not os.path.exists(filename):
+        file_id = url.split('/')[-2]
+        dwn_url='https://drive.google.com/uc?export=download&id=' + file_id
+        urlretrieve(dwn_url, filename)
+    else:
+        pass
     df = pd.read_csv(filename)
-    df['Month'] = pd.to_datetime(df.Month)
+    try:
+        df['Month'] = pd.to_datetime(df.Month, format='%Y-%m')
+    except TypeError:
+        df['Month'] = pd.to_datetime(df.Month)
+    #df = df.set_index('Month')
+    df.rename(columns={'#Passengers':'Passengers'}, inplace=True)
+    
+    # Unit testing
+    #assert all(df.columns == ['Passengers'])
+    
     return df
